@@ -20,9 +20,9 @@ public class LogPositionOrientation : MonoBehaviour {
             //Debug.Log(gameObject.transform.forward.ToString("F6"));
             //Debug.Log(JsonUtility.ToJson(gameObject.transform.position));
             time = 0;
-            LogManager.Log(gameObject, string.Format("position: {0}; orientation: {1}",
+            LogManager.Log(gameObject, string.Format("position: {0}; eulerAngles: {1}",
                 gameObject.transform.position.ToString("F6"),
-                gameObject.transform.forward.ToString("F6")));
+                gameObject.transform.eulerAngles.ToString("F6")));
         }
     }
 }
