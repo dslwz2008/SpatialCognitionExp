@@ -8,6 +8,7 @@ using System.Data;
 public class DataAnalysis : MonoBehaviour {
     public LineRenderer walkPath;
     public GameObject pointPrefab;
+    public GameObject intersectParent;
     public GameObject parent;
     private string vrDir;
     private Dictionary<string, DataTable> dataDict = new Dictionary<string, DataTable>();
@@ -140,16 +141,26 @@ public class DataAnalysis : MonoBehaviour {
             go.GetComponent<TextMesh>().text = (i+1).ToString();
             go.transform.parent = parent.transform;
             //视线移动轨迹
-            RaycastHit hit;
-            Vector3 eulerAngle = new Vector3(float.Parse(row["CtlEulerAnglesX"].ToString()),
-                 float.Parse(row["CtlEulerAnglesY"].ToString()),
-                 float.Parse(row["CtlEulerAnglesZ"].ToString()));
+            Vector3 eulerAngle = new Vector3(float.Parse(row["CamEulerAnglesX"].ToString()),
+                 float.Parse(row["CamEulerAnglesY"].ToString()),
+                 float.Parse(row["CamEulerAnglesZ"].ToString()));
+            //Debug.Log(eulerAngle);
             Vector3 dir = Quaternion.Euler(eulerAngle) * Vector3.forward;
-            Debug.DrawRay(vec, dir);
-            //if (Physics.Raycast(vec, dir, out hit, 500f, 8))
-            //{
-            //    Debug.DrawLine(vec, hit.point);
-            //}
+            //Debug.Log(dir);
+            //Debug.DrawRay(vec, dir, Color.green, 1000, true);
+            RaycastHit hit;
+            int layerMask = 1 << 8;
+            if (Physics.Raycast(vec, dir, out hit, 500f, layerMask))
+            {
+                //Debug.Log(vec.ToString()+ hit.point.ToString());
+                Debug.DrawLine(vec, hit.point, Color.blue, 1000, true);
+                //创建相交节点
+                GameObject intersectGo = (GameObject)Instantiate(pointPrefab, hit.point,
+                    Quaternion.identity);
+                intersectGo.GetComponent<TextMesh>().text = (i + 1).ToString();
+                intersectGo.transform.parent = intersectParent.transform;
+                //intersectGo.transform.GetChild(0).LookAt();
+            }
         }
         walkPath.SetVertexCount(positions.Count);
         walkPath.SetPositions(positions.ToArray());
