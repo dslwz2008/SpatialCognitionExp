@@ -125,6 +125,14 @@ public class CommonDataAnalysis : MonoBehaviour {
                 Destroy(parent.transform.GetChild(i).gameObject);
             }
         }
+        if (intersectParent.transform.childCount != 0)
+        {
+            for (int i = 0; i < intersectParent.transform.childCount; i++)
+            {
+                Destroy(intersectParent.transform.GetChild(i).gameObject);
+            }
+        }
+        walkPath.SetVertexCount(0);
 
         DataTable dt = dataDict[key];
         List<Vector3> positions = new List<Vector3>();
