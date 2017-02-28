@@ -6,6 +6,7 @@ using System;
 using System.Data;
 
 public class DataAnalysis : MonoBehaviour {
+    public bool showUI = true;
     public LineRenderer walkPath;
     public GameObject pointPrefab;
     public GameObject intersectParent;
@@ -101,6 +102,7 @@ public class DataAnalysis : MonoBehaviour {
 
     void OnGUI()
     {
+        if (!showUI) { return; }
         string[] strings = selStrings.ToArray();
         //GUILayout.BeginVertical("Box",GUILayout.Height(500));
         scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(200), GUILayout.Height(300));
