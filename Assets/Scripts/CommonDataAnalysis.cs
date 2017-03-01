@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using System.Data;
+using System.Text;
 
 public class CommonDataAnalysis : MonoBehaviour {
     public bool showUI = true;
     public LineRenderer walkPath;
+    public LineRenderer viewPath;
     public GameObject pointPrefab;
     public GameObject intersectParent;
     public GameObject parent;
     private string dataDir;
+    private string outputDir;
     private Dictionary<string, DataTable> dataDict = new Dictionary<string, DataTable>();
     private int selGridInt = 0;
     private Vector2 scrollPosition;
@@ -19,7 +22,8 @@ public class CommonDataAnalysis : MonoBehaviour {
 
     void Awake() {
         dataDir = Application.streamingAssetsPath + "/Common";
-        string [] files = Directory.GetFiles(dataDir,"*FirstPersonCharacter*.txt");
+        outputDir = Application.streamingAssetsPath + "/CommonOutput";
+        string[] files = Directory.GetFiles(dataDir,"*FirstPersonCharacter*.txt");
         foreach (string filename in files)
         {
             //Debug.Log(filename);
@@ -135,10 +139,13 @@ public class CommonDataAnalysis : MonoBehaviour {
             }
         }
         walkPath.SetVertexCount(0);
+        viewPath.SetVertexCount(0);
 
         DataTable dt = dataDict[key];
         List<Vector3> positions = new List<Vector3>();
-        for(int i = 0; i < dt.Rows.Count; i++)
+        List<Vector3> intersectPositions = new List<Vector3>();
+        StreamWriter sw = new StreamWriter(outputDir + "/" + key + ".csv", false, Encoding.UTF8);
+        for (int i = 0; i < dt.Rows.Count; i++)
         {
             DataRow row = dt.Rows[i];
             Vector3 vec = new Vector3(float.Parse(row["CamPositionX"].ToString()),
@@ -156,6 +163,10 @@ public class CommonDataAnalysis : MonoBehaviour {
                  float.Parse(row["CamEulerAnglesZ"].ToString()));
             //Debug.Log(eulerAngle);
             Vector3 dir = Quaternion.Euler(eulerAngle) * Vector3.forward;
+            string line = String.Format("{0},{1},{2},{3},{4},{5}",
+                vec[0].ToString("F6"), vec[1].ToString("F6"), vec[2].ToString("F6"),
+                dir[0].ToString("F6"), dir[1].ToString("F6"), dir[2].ToString("F6"));
+            sw.WriteLine(line);
             //Debug.Log(dir);
             //Debug.DrawRay(vec, dir, Color.green, 1000, true);
             RaycastHit hit;
@@ -164,6 +175,7 @@ public class CommonDataAnalysis : MonoBehaviour {
             {
                 //Debug.Log(vec.ToString()+ hit.point.ToString());
                 Debug.DrawLine(vec, hit.point, Color.blue, 1000, true);
+                intersectPositions.Add(hit.point);
                 //创建相交节点
                 GameObject intersectGo = (GameObject)Instantiate(pointPrefab, hit.point,
                     Quaternion.identity);
@@ -172,6 +184,9 @@ public class CommonDataAnalysis : MonoBehaviour {
                 //intersectGo.transform.GetChild(0).LookAt();
             }
         }
+        sw.Close();
+        viewPath.SetVertexCount(intersectPositions.Count);
+        viewPath.SetPositions(intersectPositions.ToArray());
         walkPath.SetVertexCount(positions.Count);
         walkPath.SetPositions(positions.ToArray());
     }
